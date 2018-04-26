@@ -48,7 +48,7 @@ const _before = (lens, mutate) => {
  */
 export class Reactor extends React.Component {
   /**
-   * Creates an object the proxies a path on the state object.
+   * Creates an object that proxies a path on the state object for read (take) and update (put).
    * @param path may be an array or an argument list of strings.
    * @return {*} a Lens.
    */
