@@ -10,7 +10,7 @@ class DummyNames {
     this.index = 0;
   }
   static dummy_names() {
-    return [['Commandant', 'Steele'], ['General', 'Knox'], ['Taylor', 'Cobb'], ['Jaynis', 'Cobb']];
+    return [['Helena', 'Pierce'], ['Taylor', 'Cobb'], ['Alphonso', 'Knoxx']];
   }
   get() {
     const name = DummyNames.dummy_names()[this.index];
@@ -25,6 +25,10 @@ class CreateUser extends Reactor {
     this.state = U.orElse(props.user, {id: 0, givenName: '', familyName: ''});
     this._givenName = super.lens('givenName');
     this._familyName = super.lens('familyName');
+  }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    void prevState;
+    return U.orElse(nextProps.user, {users: null, edit: null});
   }
   render() {
     let givenName = this._givenName.take();
@@ -60,7 +64,7 @@ const api = API("http://localhost:8080/api/");
 class App extends Reactor {
   constructor(props) {
     super(props);
-    this.state = {users: null, edit: null};
+    this.state = U.orElse(props.user, {users: null, edit: null});
     this._users = super.lens('users');
     this._edit = super.lens('edit');
     this.updateUsers = this.updateUsers.bind(this);
@@ -97,7 +101,10 @@ class App extends Reactor {
                           api.users.deleteUser(user.id)(r => {
                             this.updateUsers();
                           });
-                        }}>X</W.Button><span>{' [' + user.id + '] ' + user.givenName + ' ' + user.familyName}</span>
+                        }}>X</W.Button><span onClick={e => {
+                        e.preventDefault();
+                        this._edit.put(user);
+                      }}>{' [' + user.id + '] ' + user.givenName + ' ' + user.familyName}</span>
                       </div>
                     }
                 )}</div>

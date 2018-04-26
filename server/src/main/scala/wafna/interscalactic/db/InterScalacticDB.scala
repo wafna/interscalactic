@@ -39,7 +39,7 @@ object InterScalacticDB {
       // How to get last inserted id.
       def create(givenName: String, familyName: String): FixedSqlAction[User, NoStream, Effect.Write] =
         (users returning users.map(_.id) into ((user, id) => user.copy(id = id))) += User(0, givenName, familyName)
-      def update(user: User): FixedSqlAction[Int, NoStream, Effect.Write] = users.update(user)
+      def update(user: User): FixedSqlAction[Int, NoStream, Effect.Write] = users.filter(_.id === user.id).update(user)
     }
     object role {}
     object userRole {
