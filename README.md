@@ -1,6 +1,6 @@
 # InterScalactic
 
-An ongoing demo project in Scala using Akka, Slick, and whatever else looks useful or interesting.
+An ongoing demo project in React and Scala using Akka, Slick, and whatever else looks useful or interesting.
 
 Prêt-à-hack.
 
