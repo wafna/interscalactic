@@ -2,113 +2,120 @@ import React from 'react';
 import './App.css';
 import * as W from './Widgets';
 import * as U from './Util';
-import {API} from './API';
+import {api} from './API';
 import {Reactor} from './Reactor';
 // All this to avoid the lint of having a var declaration for the index. :/
-class DummyNames {
-  constructor() {
-    this.index = 0;
-  }
-  static dummy_names() {
-    return [['Helena', 'Pierce'], ['Taylor', 'Cobb'], ['Alphonso', 'Knoxx']];
-  }
-  get() {
-    const name = DummyNames.dummy_names()[this.index];
-    this.index = (1 + this.index) % DummyNames.dummy_names().length;
+const dummyNames = (() => {
+  let index = 0;
+  const names = [['Leonard', 'Susskind'], ['Richard', 'Feynman'], ['Max', 'Tegmark'], ['Hugh', 'Everett']];
+  return () => {
+    const name = names[index];
+    index = (1 + index) % names.length;
     return name;
   }
-}
-const dummyNames = new DummyNames();
-class CreateUser extends Reactor {
+})();
+class UserForm extends Reactor {
   constructor(props) {
     super(props);
-    this.state = U.orElse(props.user, {id: 0, givenName: '', familyName: ''});
-    this._givenName = super.lens('givenName');
-    this._familyName = super.lens('familyName');
+    this.state = {mode: !!props.mode, user: U.orElse(props.user, {id: 0, givenName: '', familyName: ''})};
+    this._user = super.lens('user');
+    this._givenName = this._user.focus('givenName');
+    this._familyName = this._user.focus('familyName');
+    // if we're given a user the mode controls whether we're editing or displaying.
+    this._mode = super.lens('mode');
   }
   static getDerivedStateFromProps(nextProps, prevState) {
     void prevState;
-    return U.orElse(nextProps.user, {users: null, edit: null});
+    return {user: U.orElse(nextProps.user, {id: 0, givenName: '', familyName: ''}), mode: !!nextProps.mode};
   }
   render() {
+    let self = this;
     let givenName = this._givenName.take();
     let familyName = this._familyName.take();
-    let enabled = !!givenName && !!familyName;
-    return (
-        <div className="well">
-          <form>
-            <div><label> Given Name: <W.Input lens={this._givenName}/> </label></div>
-            <div><label> Family Name: <W.Input lens={this._familyName}/> </label></div>
-            <div><W.Button className="btn btn-primary" disabled={!enabled} onClick={() => {
-              if (this.state.id)
-                this.props.updateUser(this.state.id, this._givenName.take(), this._familyName.take());
-              else
-                this.props.createUser(this._givenName.take(), this._familyName.take());
-            }}>{this.state.id ? 'Update' : 'Create'}</W.Button>
-              <W.Button className="btn btn-secondary" onClick={() => {
-                const name = dummyNames.get();
-                this._givenName.put(name[0]);
-                this._familyName.put(name[1]);
-              }}>Make something up</W.Button>
-              <W.Button className="btn btn-warning" onClick={() => {
-                this._givenName.put('');
-                this._familyName.put('');
-              }}>Clear</W.Button>
-            </div>
-          </form>
-        </div>
-    );
+    let submitEnabled = !!givenName && !!familyName;
+    let clearEnabled = !!givenName || !!familyName;
+    let user = this.state.user;
+    let mode = this.state.mode;
+    if (0 < user.id && !mode)
+      return <span>{' [' + user.id + '] ' + user.givenName + ' ' + user.familyName}</span>;
+    else {
+      return (
+          <div className="well">
+            <form>
+              <div><label> Given Name: <W.Input lens={self._givenName}/> </label></div>
+              <div><label> Family Name: <W.Input lens={self._familyName}/> </label></div>
+              <div><W.Button className="btn btn-primary" disabled={!submitEnabled} onClick={() => {
+                self._mode.put(false);
+                let p = null;
+                if (0 < self.state.user.id) {
+                  p = api.users.updateUser(self.state.user);
+                } else {
+                  p = api.users.createUser(self.state.user);
+                }
+                p(() => self.props.updateUsers());
+              }}>{self.state.mode ? 'Update' : 'Create'}</W.Button>
+                <W.Button className="btn btn-warning" disabled={!clearEnabled} onClick={() => {
+                  self._givenName.put('');
+                  self._familyName.put('');
+                }}>Clear</W.Button>
+                <W.Button className="btn btn-secondary" onClick={() => {
+                  const name = dummyNames();
+                  self._givenName.put(name[0]);
+                  self._familyName.put(name[1]);
+                }}>Make something up</W.Button>
+              </div>
+            </form>
+          </div>
+      );
+    }
   }
 }
-const api = API("http://localhost:8080/api/");
 class App extends Reactor {
   constructor(props) {
     super(props);
-    this.state = U.orElse(props.user, {users: null, edit: null});
+    this.state = {users: null, selected: null};
+    // Lenses prefaced with _ for notational clarity.
     this._users = super.lens('users');
-    this._edit = super.lens('edit');
+    this._selected = super.lens('selected');
     this.updateUsers = this.updateUsers.bind(this);
   }
   updateUsers() {
+    this._selected.put(null);
     api.users.list()(this._users.put);
   }
   componentDidMount() {
     this.updateUsers();
   }
   render() {
+    const selected = this._selected.take();
     return (
         <main role="main">
           <div className="jumbotron">
             <div className="container">
-              <h1 className="display-3">InterScalactic</h1>
+              <h1 className="display-3"><W.Icon name='aperture' size={{height: 80, width: 80}}/>InterScalactic</h1>
               <p>Soup to nuts with React, Akka, Slick.</p>
             </div>
           </div>
           <div className="container">
-            <CreateUser user={this._edit.take()} createUser={(givenName, familyName) => {
-              api.users.createUser(givenName, familyName)(() => {
-                this.updateUsers();
-              });
-            }} updateUser={(id, givenName, familyName) => {
-              api.users.updateUser(id, givenName, familyName)(() => {
-                this.updateUsers();
-              });
-            }}/>
             {(this.state.users) ? (
                 <div>{this.state.users.map(user => {
+                      let mode = !!selected && selected.id === user.id;
                       return <div key={user.id}>
-                        <W.Button onClick={() => {
-                          api.users.deleteUser(user.id)(r => {
+                        <W.Icon name='delete' onClick={() => {
+                          this._selected.put(null);
+                          api.users.deleteUser(user.id)(() => {
                             this.updateUsers();
                           });
-                        }}>X</W.Button><span onClick={e => {
-                        e.preventDefault();
-                        this._edit.put(user);
-                      }}>{' [' + user.id + '] ' + user.givenName + ' ' + user.familyName}</span>
+                        }}/>
+                        <W.Icon name='pencil' onClick={() => this._selected.put(user)}/>
+                        {(!!selected && selected.id === user.id) ?
+                            <W.Icon name='action-undo' onClick={() => this._selected.put(null)}/> : null}
+                        <UserForm user={user} mode={mode} updateUsers={this.updateUsers}/>
                       </div>
                     }
                 )}</div>
             ) : null}
+            <UserForm updateUsers={this.updateUsers}/>
           </div>
         </main>
     );

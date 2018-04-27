@@ -67,10 +67,10 @@ object InterScalacticDB {
           (users.schema ++ roles.schema ++ usersRoles.schema).create,
           roles ++= Seq(Role(0, "admin"), Role(0, "reader"), Role(0, "writer")),
           users ++= Seq(
-            User(0, "Doctor", "Ned"),
-            User(0, "Baron", "Flynt"),
-            User(0, "Shep", "Sanders"),
-            User(0, "Papa", "Krom")
+            User(0, "Isaac", "Newton"),
+            User(0, "Albert", "Einstein"),
+            User(0, "James", "Clerk Maxwell"),
+            User(0, "Erwin", "Schrödinger")
           ),
           usersRoles ++= Seq((1, 1), (2, 2), (2, 3))
         ),

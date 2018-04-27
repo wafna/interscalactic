@@ -1,21 +1,17 @@
 package wafna.interscalactic.server
-
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.MethodDirectives.{ get, post }
+import akka.http.scaladsl.server.directives.MethodDirectives.{get, post}
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import wafna.interscalactic.db.InterScalacticDB
 import wafna.interscalactic.domain.User
-
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import scala.util.{ Failure, Success }
-
+import scala.util.{Failure, Success}
 /**
   * Entities and serialization for JSON payloads.
   */

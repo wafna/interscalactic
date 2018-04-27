@@ -13,23 +13,20 @@ export const CHECK = {
 export const orElse = (v, d) =>
     (v !== undefined && v !== null) ? v : (undefined === d ? null : d);
 /**
- * Encapsulates mutability at a path within an object graph.
- * @param obj The root of the object graph.
- * @returns {function(path): {get: (function(): *), set: (function(*): *)}}
+ * Creates a function that takes a value and asserts that it is either null or of the indicated type.
+ * @param type
+ * @returns {Function}
  */
-export const OPath = obj => {
-  return function (path) {
-    let prefix = path.slice(0, path.length - 1);
-    let final = path[path.length - 1];
-    let s = prefix.reduce((o, s) => {
-      // only fills in missing values.
-      if (undefined === o[s])
-        o[s] = {};
-      return o[s];
-    }, obj);
-    return {
-      get: () => s[final],
-      set: v => s[final] = v
-    };
-  };
+export const assertType = type => {
+  return v => {
+    if (v === undefined) throw new Error('Undefined.');
+    if (v !== null && typeof v !== type)
+      throw new Error('Value ' + v + ' of wrong type: required ' + type + ' but found ' + (typeof v));
+  }
+};
+assertType.string = assertType('string');
+assertType.number = assertType('number');
+assertType.boolean = assertType('boolean');
+assertType.array = v => {
+  if (!Array.isArray(v)) throw new Error('Value ' + v + ' of wrong type: required Array but found ' + (typeof v));
 };

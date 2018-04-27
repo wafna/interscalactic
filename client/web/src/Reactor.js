@@ -1,94 +1,67 @@
 import React from "react";
-const assertFunction = (f, msg) => {
-  if (typeof f !== 'function')
-    throw new Error('Function required: ' + msg);
-};
+import {assertType} from './Util';
 /**
- * Generically produces a new Lens for a notifier.
+ * Create a lens into a component's state.
+ * @param component The component containing the state.
+ * @param name The top level field in the state.
+ * @param path The object path within the state (below the first field).
+ * @returns {{take: (function(): *), put: (function(*=)), focus: (function(*=))}} A Lens.
  */
-const _after = (lens, notify) => {
-  assertFunction(notify, '');
-  const newLens = {
-    take: () => lens.take(),
+const Lens = (component, name, path) => {
+  // Needn't check the other params as they are internally controlled.
+  assertType.string(name);
+  const lens = {
+    take: () => path.reduce((a, p) => a[p], component.state[name]),
     put: v => {
-      lens.put(v);
-      notify(v);
-      return newLens;
+      if (v === undefined) throw new Error('Undefined values are disallowed.');
+      const s = {};
+      if (0 === path.length) {
+        s[name] = v;
+        component.setState(s);
+      } else {
+        const init = path.slice(0, path.length - 1);
+        const last = path[path.length - 1];
+        init.reduce((p, a) => {
+          console.log(p, a);
+          return p[a]
+        }, component.state[name])[last] = v;
+        component.setState(s);
+      }
+      return lens;
     },
-    before: f => _before(newLens, f),
-    after: f => _after(newLens, f)
+    focus: n => {
+      // Make a copy of the array rather than mutating the paths of all the other lenses!
+      const slice = path.slice();
+      slice.push(n);
+      return Lens(component, name, slice);
+    }
   };
-  return newLens;
-};
-/**
- * Generically produces a new Lens for a mutator.
- */
-const _before = (lens, mutate) => {
-  assertFunction(mutate);
-  const newLens = {
-    take: () => lens.take(),
-    put: v => {
-      lens.put(mutate(v));
-      return newLens;
-    },
-    before: mutate => _before(newLens, mutate),
-    after: notify => _after(newLens, notify)
-  };
-  return newLens;
+  return lens;
 };
 /**
  * A 'mixin' for stateful React components allowing projections of components of the state.
- * These projections must exist in the state or NPEs will result.
- * When a value is put, a call to component.setState is made with the value placed at the path.
- * In the component's constructor add code like this.
- * <code>
- *   this.state = {'stuff', 'moreStuff', 'value managed by the lens, below'};
- *   this.myLens = super.lens(['stuff', 'moreStuff']);
- * </code>
  */
 export class Reactor extends React.Component {
+  // Runtime lint flags this as a useless constructor but IDEA lint flags all derived classes' constructors if this
+  // isn't here.  Sigh.
+  constructor(props) {
+    super(props);
+  }
   /**
    * Creates an object that proxies a path on the state object for read (take) and update (put).
-   * @param path may be an array or an argument list of strings.
+   * E.g. inside the component's constructor put the following...
+   * <code>
+   *   this.state = {user: {id: 0, name: ''};
+   *   this._user = super.lens('user');
+   *   this._name = this._user.focus('name');
+   * </code>
+   * ... and now you can pass this._name to an Input widget and it will initialize itself from the _name lens as well as
+   * push all its changes into it.
+   * @param name Names the top level field within state that this represents.
    * @return {*} a Lens.
    */
-  lens(path) {
-    const steps = Array.isArray(path) ? path : Array.from(arguments);
-    const self = this;
-    const rootLens = {
-      /**
-       * Get the component's state  at the specified path.
-       */
-      take: () =>
-          steps.reduce((o, s) => o[s], self.state),
-      /**
-       * Set the component's state at the specified path.
-       */
-      put: v => {
-        if (v === undefined)
-          throw new Error('Undefined values are forbidden.');
-        // create an object with the specified path to v and set the component's state with it.
-        let prefix = steps.slice(0, steps.length - 1);
-        let final = steps[steps.length - 1];
-        let s = prefix.reduce((o, s) => {
-          o[s] = {};
-          return o[s];
-        }, {});
-        s[final] = v;
-        self.setState(s);
-        return rootLens;
-      },
-      /**
-       * Create a new Lens that executes `notify` with the new value after the value is set.
-       * Useful for adding concurrent state changes.
-       */
-      after: notify => _after(rootLens, notify),
-      /**
-       * Creates a new Lens that maps new values through f before setting.
-       * Useful to coerce data, like ids from select options.
-       */
-      before: mutate => _before(rootLens, mutate),
-    };
-    return rootLens;
+  lens(name) {
+    return Lens(this, name, []);
   }
 }
+export default Reactor;

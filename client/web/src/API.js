@@ -67,12 +67,13 @@ export function API(baseURL, opts) {
     users: {
       list: () =>
           USERS.GET(),
-      createUser: (givenName, familyName) =>
-          USERS.POST({type: 'Create', givenName: givenName, familyName: familyName}),
+      createUser: (user) =>
+          USERS.POST({type: 'Create', givenName: user.givenName, familyName: user.familyName}),
       deleteUser: id =>
           USERS.POST({type: 'Delete', id: id}),
-      updateUser: (id, givenName, familyName) =>
-          USERS.POST({type: 'Update', id: id, givenName: givenName, familyName: familyName})
+      updateUser: (user) =>
+          USERS.POST({type: 'Update', id: user.id, givenName: user.givenName, familyName: user.familyName})
     }
   };
 }
+export const api = API('http://localhost:8080/api/');
