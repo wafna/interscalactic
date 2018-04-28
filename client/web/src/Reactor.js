@@ -4,7 +4,7 @@ import {assertType} from './Util';
  * Create a lens into a component's state.
  * @param component The component containing the state.
  * @param name The top level field in the state.
- * @param path The object path within the state (below the first field).
+ * @param path The object path within the field of the state.
  * @returns {{take: (function(): *), put: (function(*=)), focus: (function(*=))}} A Lens.
  */
 const Lens = (component, name, path) => {
@@ -42,12 +42,13 @@ const Lens = (component, name, path) => {
 export class Reactor extends React.Component {
   constructor(props) {
     super(props);
-    // This does nothing useful other than to suppress the lint warning about a useless constructor.
+    // This does nothing useful other than to suppress the lint warning about a useless constructor
+    // and heat up the room very sightly.  If we elide this ctor we get lint warnings in all descendants of Reactor.
     this.state = {};
   }
   /**
    * Creates an object that proxies a field on the state object for read (take) and update (put).
-   * E.g. inside the component's constructor put the following...
+   * E.g. inside the constructor of a component representing a form put the following...
    * <code>
    *   this.state = {user: {id: 0, name: ''};
    *   this._user = super.lens('user');
