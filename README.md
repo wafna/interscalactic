@@ -2,6 +2,8 @@
 
 An ongoing demo project in React and Scala using Akka, Slick, and whatever else looks useful or interesting.
 
+Prêt-à-hack.
+
 ## Client
 
 Demonstrates a concise system for managing React component state. 
@@ -9,8 +11,6 @@ Demonstrates a concise system for managing React component state.
 ## Server
 
 The database layer is quite straight forward; it shovels futures from the database to the http threads on the routes. 
-
-Prêt-à-hack.
 
 ## Run
 
