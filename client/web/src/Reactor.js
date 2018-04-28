@@ -8,8 +8,6 @@ import {assertType} from './Util';
  * @returns {{take: (function(): *), put: (function(*=)), focus: (function(*=))}} A Lens.
  */
 const Lens = (component, name, path) => {
-  // Needn't check the other params as they are internally controlled.
-  assertType.string(name);
   const lens = {
     take: () => path.reduce((a, p) => a[p], component.state[name]),
     put: v => {
@@ -42,13 +40,13 @@ const Lens = (component, name, path) => {
  * A 'mixin' for stateful React components allowing projections of components of the state.
  */
 export class Reactor extends React.Component {
-  // Runtime lint flags this as a useless constructor but IDEA lint flags all derived classes' constructors if this
-  // isn't here.  Sigh.
   constructor(props) {
     super(props);
+    // This does nothing useful other than to suppress the lint warning about a useless constructor.
+    this.state = {};
   }
   /**
-   * Creates an object that proxies a path on the state object for read (take) and update (put).
+   * Creates an object that proxies a field on the state object for read (take) and update (put).
    * E.g. inside the component's constructor put the following...
    * <code>
    *   this.state = {user: {id: 0, name: ''};
@@ -61,6 +59,7 @@ export class Reactor extends React.Component {
    * @return {*} a Lens.
    */
   lens(name) {
+    assertType.string(name);
     return Lens(this, name, []);
   }
 }
