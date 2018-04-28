@@ -14,8 +14,10 @@ The database layer is quite straight forward; it shovels futures from the databa
 
 ## Run
 
-Run the api server from sbt using class wafna.interscalactic.InterScalacticServer
+Run the api server from sbt using class wafna.interscalactic.InterScalacticServer.  The server can also server the 
+production web build (from the root path on port 8080).
 
-Run the web server from npm at client/web.
+Run the web server from npm at client/web.  This will server the dev web content on port 3030 and is configured to 
+use the API on port 8080.
 
-Better still, run it all out of IDEA.
+The above can be done very conveniently in IDEA.
