@@ -1,12 +1,11 @@
-import {CHECK, orElse} from './Util';
+import {orElse} from './Util';
 /**
  * API client.
  * @param baseURL
  * @param opts For default exception handlers, {defaultOnFailure, defaultOnError}.
  * @returns {*} The API.
  */
-export function API(baseURL, opts) {
-  CHECK.PURE(this);
+export const API = (baseURL, opts) => {
   let defOpts = orElse(opts, {});
   let defaultOnError = orElse(defOpts['defaultOnError'], function (error) {
     console.error('FETCH ERROR', error);
@@ -25,12 +24,10 @@ export function API(baseURL, opts) {
       let hs = orElse(exceptionHandlers, {});
       promise.then(response => {
         // take anything that looks like success, verb notwithstanding.
-        if (![200, 201].includes(response.status)) {
-          orElse(hs.onFailure, defaultOnFailure)(response);
+        if ([200, 201].includes(response.status)) {
+          response.json().then(onSuccess);
         } else {
-          response.json().then(data => {
-            onSuccess(data)
-          });
+          orElse(hs.onFailure, defaultOnFailure)(response);
         }
       }).catch(orElse(hs.onError, defaultOnError));
     };
@@ -75,5 +72,5 @@ export function API(baseURL, opts) {
           USERS.POST({type: 'Update', id: user.id, givenName: user.givenName, familyName: user.familyName})
     }
   };
-}
+};
 export const api = API('http://localhost:8080/api/');

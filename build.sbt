@@ -17,6 +17,14 @@ lazy val common = project
     libraryDependencies ++= commonDependencies
   )
 
+lazy val games = project
+  .settings(
+    name := "games",
+    settings,
+    libraryDependencies ++= commonDependencies
+  )
+  .dependsOn(common)
+
 lazy val akkaHttpVersion = "10.1.0"
 lazy val akkaVersion = "2.5.11"
 lazy val server = project
