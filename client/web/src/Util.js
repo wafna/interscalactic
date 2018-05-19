@@ -7,37 +7,19 @@
 export const orElse = (v, d) =>
     (v !== undefined && v !== null) ? v : (undefined === d ? null : d);
 /**
- * Creates a function that takes a value and asserts that it is either null or of the indicated type.
- * @param type
- * @returns {Function}
+ * For validating values.
  */
-const assertType = type => {
-  return v => {
-    if (v === undefined) {
-      throw new Error('Undefined.');
-    }
-    if (v !== null && typeof v !== type) {
-      throw new Error('Required ' + type + ' but got value ' + v + ' of type ' + (typeof v));
-    }
-  }
-};
 export const check = {
-  assert: (cond, msg) => {
-    if (!cond) {
-      throw new Error(msg)
-    }
-  },
   isDefined: x => x !== undefined,
-  notNull: x => (x !== null) && (x !== undefined),
-  isString: assertType('string'),
-  isNumber: assertType('number'),
-  isBoolean: assertType('boolean'),
-  isArray: a => {
-    if (!Array.isArray(a)) {
-      throw new Error('Required Array but got value ' + a + ' of type ' + (typeof a));
-    }
-  },
-  isFunction: assertType('function')
+  isNull: x => x !== undefined,
+  exists: x => (x !== null) && (x !== undefined),
+  isNumber: x => 'number' === typeof x,
+  isString: x => 'string' === typeof x,
+  isBoolean: x => 'boolean' === typeof x,
+  isArray: x => Array.isArray(x),
+  // null is of type 'object'.
+  isObject: x => (x !== null) && ('object' === typeof x),
+  isFunction: x => ('function' === typeof x)
 };
 /**
  *
@@ -47,7 +29,8 @@ export const Const = (() => {
   let value = null;
   const f = () => value;
   f.set = v => {
-    check.notNull(v);
+    if (! check.exists(v))
+      throw new Error('Value must exist.');
     value = v;
   };
   return f;

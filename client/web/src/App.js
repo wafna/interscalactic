@@ -3,6 +3,27 @@ import {Reactor} from './Reactor';
 import {HashRouter, Link, Route} from 'react-router-dom'
 import {Crud} from "./Crud";
 import {Icon} from './Widgets';
+
+const hexDigits  = '0123456789abcdef';
+
+const dec2hex = dec => {
+  var basis = 16;
+  var remainder = dec;
+  var accumulatedDigits = [];
+  do {
+    const x = remainder % basis;
+    const digit=  hexDigits[x];
+    accumulatedDigits.push(digit);
+    remainder -= x;
+    remainder /= 16;
+  } while (0 < remainder);
+  return accumulatedDigits77.reduce((hexString, digit) => hexString + digit, '0x');
+};
+
+console.log(dec2hex(0));
+console.log(dec2hex(10));
+console.log(dec2hex(20));
+console.log(dec2hex(42));
 function NavBar(props) {
   void props;
   return <nav className="navbar navbar-expand-md navbar-dark fixed-top bg-dark">

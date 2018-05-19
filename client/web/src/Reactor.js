@@ -46,14 +46,13 @@ export class Reactor extends React.Component {
     this.lens = {};
   }
   /**
-   * Recursively makes lenses for each field in the initialState.
-   * Thus, there will be a lens at each node plus an object containing names matching each field in the node
-   * iff the node contains an object.
+   * Recursively makes lenses for each field in the initialState and sets the component's initial state.
+   * Thus, there will be a lens at each node and each lens will contain fields for each branch in the object tree.
    * The resulting object in this.lens will be isomorphic to the initial state  except that each node will also be a
    * lens in addition to being an object for the purposes of object navigation.
    * NB this is called in lieu of setting state in derived classes.
-   * Only to be called from constructor.
-   * Don't set state after calling this.
+   * NB Only to be called from constructor!
+   * NB Don't set state after calling this!
    */
   lenses(initialState) {
     const updateSeg = (lens, seg) => {

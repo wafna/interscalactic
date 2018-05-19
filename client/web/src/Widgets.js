@@ -1,12 +1,24 @@
 import React from 'react';
-import * as U from './Util';
+import {orElse, check} from './Util';
 export const icons = {
   CircleX: <Icon name='circle-x'/>
 };
 export function Icon(props) {
-  let size = U.orElse(props.size, {height: 24, width: 24});
-  return <img src={'/open-iconic/svg/' + props.name + '.svg'} alt={U.orElse(props.alt, props.name)}
-              height={size.height} width={size.width}
+  let size = orElse(props.size, {height: 24, width: 24});
+  // Could check this in PropType but we also need to transform.
+  const extent = (() => {
+    if (check.isNumber(props.size)) {
+      return {height: size, width: size};
+    } else if (check.isObject(size)) {
+      return size;
+    } else {
+      throw new Error('Number or {height, width} required.');
+    }
+  })();
+  return <img className={orElse(props.className)}
+              src={'/open-iconic/svg/' + props.name + '.svg'}
+              alt={orElse(props.alt, props.name)}
+              height={extent.height} width={extent.width}
               onClick={e => {
                 e.preventDefault();
                 props.onClick && props.onClick()

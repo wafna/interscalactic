@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`icon sets default height and width 1`] = `
+<img
+  alt="aperture"
+  className={null}
+  height={24}
+  onClick={[Function]}
+  src="/open-iconic/svg/aperture.svg"
+  width={24}
+/>
+`;
