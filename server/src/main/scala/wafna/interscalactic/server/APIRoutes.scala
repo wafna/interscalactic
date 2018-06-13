@@ -9,7 +9,8 @@ import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.util.Timeout
 import wafna.interscalactic.db.InterScalacticDB
 import wafna.interscalactic.domain.User
-import scala.concurrent.ExecutionContext
+
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 /**

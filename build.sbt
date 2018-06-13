@@ -5,17 +5,10 @@ scalaVersion in ThisBuild := "2.12.4"
 lazy val global = project
   .in(file("."))
   .settings(settings)
-  .aggregate(
-    common,
-    server
-  )
+  .aggregate(common, server)
 
 lazy val common = project
-  .settings(
-    name := "common",
-    settings,
-    libraryDependencies ++= commonDependencies
-  )
+  .settings(name := "common", settings, libraryDependencies ++= commonDependencies)
 
 lazy val games = project
   .settings(
@@ -32,7 +25,7 @@ lazy val server = project
     name := "server",
     settings,
     assemblySettings,
-    mainClass in (Compile, run) := Some("myPackage.aMainClass"),
+    mainClass in (Compile, run) := Some("wafna.interscalactic.server.InterScalacticServer"),
     libraryDependencies ++= commonDependencies ++ Seq(
       "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
@@ -47,8 +40,7 @@ lazy val server = project
       "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
       "com.typesafe.akka" %% "akka-stream-testkit" % akkaVersion % Test
-    ),
-    mainClass in Compile := Some("demo.Usage")
+    )
   )
   .dependsOn(common)
 
@@ -81,9 +73,7 @@ lazy val commonSettings = Seq(
   resolvers ++= Seq(
     // "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
-  )
-)
+    Resolver.sonatypeRepo("snapshots")))
 
 lazy val wartremoverSettings = Seq(wartremoverWarnings in (Compile, compile) ++= Warts.allBut(Wart.NonUnitStatements, Wart.Var))
 
@@ -95,5 +85,4 @@ lazy val assemblySettings = Seq(
   assemblyMergeStrategy in assembly := {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
     case _ => MergeStrategy.first
-  }
-)
+  })
